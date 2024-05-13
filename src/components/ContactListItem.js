@@ -1,79 +1,39 @@
-// ContactListItem.js
-
 import React, { Component } from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
-class ContactListItem extends Component {
-  state = {
-    profileImageUrl: null
-  };
+class ContactListItemSmall extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            userid: null,
+            firstname: "",
+            surname: "",
+        };
+    }
 
-  componentDidMount() {
-    this.getProfilePicture();
-  }
+    render() {
+        const { firstname, surname, navigationTool } = this.props;
 
-  getProfilePicture = () => {
-    const { userID, sessionToken } = this.props;
-    fetch(`http://localhost:3333/api/1.0.0/user/${userID}/photo`, {
-      method: 'GET',
-      headers: {
-        'X-Authorization': sessionToken
-      },
-    })
-    .then((res) => res.blob())
-    .then((resBlob) => {
-      const img = URL.createObjectURL(resBlob);
-      this.setState({ profileImageUrl: img });
-    })
-    .catch(() => {
-      this.setState({ profileImageUrl: '../../src/assets/images/defaultDP.jpeg' });
-    });
-  }
-  
-
-  render() {
-    const { firstname, surname } = this.props;
-    const { profileImageUrl } = this.state;
-
-    return (
-      <View style={styles.container}>
-        <View style={styles.imageContainer}>
-          <Image
-            source={profileImageUrl ? { uri: profileImageUrl } : require('../../src/assets/images/defaultDP.jpeg')}
-            style={styles.image}
-          />
-        </View>
-
-        <View style={styles.nameContainer}>
-          <Text style={styles.text}>{firstname} {surname}</Text>
-        </View>
-      </View>
-    );
-  }
+        return (
+            <TouchableOpacity style={styles.container} onPress={() => navigationTool(this.state.userid)}>
+                <Text style={styles.text}>{firstname} {surname}</Text>
+            </TouchableOpacity>
+        );
+    }
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  imageContainer: {
-    marginRight: 10,
-  },
-  image: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-  },
-  nameContainer: {
-    margin:50,
-
-  },
-  text: {
-    fontSize: 20,
-    textcolor: "black",
-  },
+    container: {
+        padding: 10,
+        backgroundColor: '',
+        borderBottomWidth: 1,
+        borderColor: '#ddd',
+        
+    },
+    text: {
+        fontSize: 16,
+        color: 'black',
+    },
 });
 
-export default ContactListItem;
+export default ContactListItemSmall;

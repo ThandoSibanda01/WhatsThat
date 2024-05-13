@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-import { SafeAreaView, TextInput, FlatList, View, StyleSheet, TouchableOpacity } from 'react-native';
-import ContactListItem from '../components/contactListItem';
+import { SafeAreaView, TextInput, FlatList, View, StyleSheet, Text } from 'react-native';
 import PageHeader from '../components/PageHeader';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import ContactListItemSmall from '../components/ContactListItemSmall'; // Ensure this component is imported
 
 class SearchScreen extends Component {
   constructor(props) {
@@ -15,20 +15,16 @@ class SearchScreen extends Component {
     };
   }
 
-
-
-
-
-  getUsers = async (name) => {
-    if (!this.state.isLoading) {
+  getUsers = async () => {
+    if (!this.state.isLoading && this.state.search) {
       try {
-        this.setState({ isLoading: true });
-
-        const response = await fetch(`http://localhost:3333/api/1.0.0/search?q=${name}&search_in=all&limit=20&offset=0`, {
+        this.setState({ isLoading: true, users: [] });
+        const sessionToken = await AsyncStorage.getItem('whatsthat_session_token');
+        const response = await fetch(`http://localhost:3333/api/1.0.0/search?q=${encodeURIComponent(this.state.search)}&search_in=all&limit=20&offset=0`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            'X-Authorization': await AsyncStorage.getItem('whatsthat_session_token'),
+            'X-Authorization': sessionToken,
           },
         });
 
@@ -36,54 +32,49 @@ class SearchScreen extends Component {
           const rJson = await response.json();
           this.setState({ users: rJson });
         } else if (response.status === 401) {
-          throw 'Unauthorised Request';
+          throw new Error('Unauthorized Request');
         } else if (response.status === 500) {
-          throw 'Server Error';
+          throw new Error('Server Error');
         }
       } catch (error) {
-        this.setState({ error: 'Error: ' + error });
+        this.setState({ error: 'Error: ' + error.message });
       } finally {
         this.setState({ isLoading: false });
       }
     }
   };
 
-
   render() {
-    const { navigation } = this.props;
-    const { sessionToken, users } = this.state;
+    const { search, users, error } = this.state;
 
     return (
       <SafeAreaView style={styles.container}>
         <PageHeader
           title="Search"
-          
+          icon="search"
+          onPress={this.getUsers}
         />
-      <TextInput 
-        style={styles.input} 
-        placeholder="Search" 
-        onChangeText={async (input) => {
-          this.setState({ search: input });
-          await this.getUsers(input);
-        }}
-      ></TextInput>
 
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Search"
+            value={search}
+            onChangeText={(input) => this.setState({ search: input })}
+          />
+        </View>
 
-      <FlatList
+        {error ? <Text style={styles.errorText}>{error}</Text> : null}
+
+        <FlatList
           keyExtractor={(item) => item.user_id.toString()}
           data={users}
           renderItem={({ item }) => (
-            <View style={styles.listItem}>
-              
-                <ContactListItem
-                  userID={item.user_id}
-                  sessionToken={sessionToken}
-                  firstname={item.first_name}
-                  surname={item.last_name}
-                />
-              
-              
-            </View>
+            <ContactListItemSmall
+              userid={item.user_id}
+              firstname={item.given_name}
+              surname={item.family_name}
+            />
           )}
         />
       </SafeAreaView>
@@ -95,13 +86,22 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    
   },
-  listItem: {
-    marginTop: 3,
-    backgroundColor: '#f8f8f8',
+  inputContainer: {
+    flexDirection: 'row',
+    width: '100%',
+    alignItems: 'center',
+    padding: 10,
+    backgroundColor: '#f5f5f5',
+  },
+  input: {
     flex: 1,
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
     borderRadius: 5,
+    marginRight: 10,
+    paddingLeft: 10,
   },
   errorText: {
     color: 'red',

@@ -67,8 +67,6 @@ class ChatListItem extends Component {
   };
 
 
-  
-
   render() {
   const { chat_name, message, timestamp, navigationTool, chat_id } = this.props;
   const { authorName } = this.state;
@@ -89,6 +87,7 @@ class ChatListItem extends Component {
     );
   }
 }
+
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
@@ -96,7 +95,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 15,
     margin: 5,
-    backgroundColor: '#f1f1f1',
+    backgroundColor: 'white',
     borderRadius: 10,
   },
 

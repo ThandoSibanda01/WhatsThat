@@ -11,7 +11,10 @@ const PageHeader = ({title, icon, onPress}) => {
       <Text style={styles.heading}>{title}</Text>
 
       <View style={styles.rightContainer}>
-        <Icon name ={icon} size={20} color='white' />
+        
+      <TouchableOpacity style={styles.rightContainer} onPress={onPress}>
+        <Icon name={icon} size={20} color='white' />
+      </TouchableOpacity>
 
       </View>
 

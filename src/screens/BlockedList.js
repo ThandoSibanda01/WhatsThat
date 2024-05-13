@@ -6,7 +6,7 @@ import PageHeader from '../components/PageHeader';
 import ContactListItemSmall from '../components/ContactListItemSmall';
 import MainAppNav from '../navigators/MainAppNav';
 
-class ContactList extends Component {
+class BlockedList extends Component {
   state = {
     contacts: [],
     error: '',
@@ -74,9 +74,8 @@ class ContactList extends Component {
     return (
       <SafeAreaView style={styles.container}>
         <PageHeader
-          title="Contacts"
-          icon="plus"
-          onPress={this.handleHeaderIconPress}
+          title="Blocked"
+          
         />
         <FlatList
           keyExtractor={(item) => item.user_id.toString()}
@@ -112,5 +111,5 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ContactList;
+export default BlockedList;
 

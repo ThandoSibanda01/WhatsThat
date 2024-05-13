@@ -8,6 +8,8 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import ContactStack from "./ContactStack";
 import ChatsStack from './ChatsStack';
 import SearchStack from './SearchStack';
+import UserStack from './UserStack'
+
 
 
 
@@ -57,14 +59,23 @@ export default class MainApp extends Component{
               tabBarIcon: ({}) => (
                 <Icon name="search" color={"purple"} size={20} />
               ),
-            }} 
+            }} />
+
+            <MainAppNav.Screen 
+            name='Profile'
+            component={UserStack}
+            options={{
+              
+              tabBarIcon: ({}) => (
+                <Icon name="user-circle" color={"purple"} size={20} />
+              ),
+            }} />
 
 
-          />
 
         
         </MainAppNav.Navigator>
-    
+
      
     );
   }

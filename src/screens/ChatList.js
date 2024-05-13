@@ -41,12 +41,12 @@ export default class ChatListScreen extends Component {
   }
 
   handleNewChatIconPress = () => {
-    this.navigation.navigate('',)
+    this.props.navigation.navigate('CreateChat')
   }
 
   handleChatPress = (chat_id) => {
     
-    return this.props.navigation.navigate('SingleChat', { chatID: chat_id});
+    this.props.navigation.navigate('SingleChat', { chatID: chat_id});
 
   };
 
@@ -57,8 +57,8 @@ export default class ChatListScreen extends Component {
       <SafeAreaView style={{ flex: 1 }}>
         <PageHeader
           title="Chats"
-          icon="plus-square-o" 
-          onRightPress={this.handleNewChatIconPress} 
+          icon="plus" 
+          onPress={this.handleNewChatIconPress} 
         />
         <FlatList
           

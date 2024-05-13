@@ -1,203 +1,139 @@
-import React, {useState} from 'react';
-import {useNavigation} from '@react-navigation/native';
-import {View, Text, TextInput, TouchableOpacity, StyleSheet, Image, SafeAreaView} from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Logo from '../components/Logo';
-
+import { useNavigation } from '@react-navigation/native';
 
 const Register = () => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
-  const [nameError, setNameError] = useState('');
-
   const [email, setEmail] = useState('');
-  const [emailError, setEmailError] = useState('');
-
-
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
-  const [passwordError, setPasswordError] = useState('');
-  const [confirmError, setConfirmError] = useState('');
-
   const [error, setError] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
-  const [userId, setUserId] = useState(null);
-  const [sessionToken, setSessionToken] = useState(null);
-
-
   const navigation = useNavigation();
 
+  const login = async (email, password) => {
+    try {
+      const response = await fetch('http://localhost:3333/api/1.0.0/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      const rJson = await response.json();
 
-  const onPressButton = () => {
-    const NameRegEx = new RegExp(/^[A-Za-z]{3,}$/);
-    const validator = require('email-validator');
-    const PasswordRegEx = new RegExp(/^(?=.*[0-9])(?=.*[A-Z])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,}$/);
-
-    let isValid = true;
-
-
-    if (!NameRegEx.test(firstName) || !NameRegEx.test(lastName) ) {
-      setNameError('Please Enter first and last names.');
-      isValid = false;
-    }
-
-    if (!validator.validate(email)) {
-      setEmailError('Please Enter a Valid Email Address');
-      isValid = false;
-    }
-
-    if (!PasswordRegEx.test(password)) {
-      setPasswordError('Please Enter a Valid Password');
-      isValid = false;
-    }
-
-    if (password != confirm ) {
-      setConfirmError('Those passwords didn’t match. Try again.');
-      isValid = false;
-    }
-
-
-    if (isValid && !submitted) {
-      setSubmitted(true);
-      
-
-      return fetch('http://localhost:3333/api/1.0.0/user',
-          {
-            method: 'post',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-              'first_name': firstName,
-              'last_name': lastName,
-              'email': email,
-              'password': password,
-            }),
-          })
-          .then((response) => {
-            if (response.status === 201) {
-              this.props.navigation.navigate('login')
-              return response.json();
-            
-            } else if (response.status === 400) {
-              throw 'Bad Request';
-            } else if (response.status === 500) {
-              throw 'Server Error, Please try again later';
-            }
-          })
-          .then((rJson) => {
-            
-            setSubmitted(false);
-          })
-          .catch((error) => {
-            setError(error);
-            setSubmitted(false);
-          });
+      if (response.status >= 200 && response.status < 300) {
+        await AsyncStorage.setItem('whatsthat_user_id', rJson.id.toString());
+        await AsyncStorage.setItem('whatsthat_session_token', rJson.token);
+        navigation.navigate('main');
+      } else {
+        throw new Error('Login failed with status: ' + response.status);
+      }
+    } catch (error) {
+      console.error(error);
+      setError('Login failed: ' + error.message);
     }
   };
 
+  const onPressButton = async () => {
+  
+    if (password !== confirm) {
+      setError("Passwords don't match.");
+      return;
+    }
+
+    setSubmitted(true);
+    setError('');
+
+    try {
+      const response = await fetch('http://localhost:3333/api/1.0.0/user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          first_name: firstName,
+          last_name: lastName,
+          email: email,
+          password: password,
+        }),
+      });
+
+      if (response.status === 201) {
+       
+        await login(email, password);
+      } else if(response === 400) {
+        throw new Error("Bad Request, Please try again later");
+      }
+    } catch (error) {
+      console.error(error);
+      setError('Registration failed: ' + error.message);
+    } finally {
+      setSubmitted(false);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
-
       <Logo/>
-
       <View style={styles.form}>
-
-        {nameError ? <Text style={styles.errorText}>{nameError}</Text> : null}
         <TextInput
           style={styles.input}
-          autoComplete='given-name'
-          keyboardType='default'
-          placeholder='First Name '
+          placeholder='First Name'
           value={firstName}
-          onChangeText={(input) => {
-            setFirstName(input);
-            setNameError('');
-          }}
+          onChangeText={setFirstName}
         />
-
         <TextInput
           style={styles.input}
-          autoComplete='family-name'
-          keyboardType='default'
           placeholder='Last Name'
           value={lastName}
-          onChangeText={(input) => {
-            setLastName(input);
-            setNameError('');
-          }}
+          onChangeText={setLastName}
         />
-
-
-        {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
         <TextInput
           style={styles.input}
-          autoComplete='email'
-          keyboardType='email-address'
           placeholder='Email'
           value={email}
-          onChangeText={(input) => {
-            setEmail(input);
-            setEmailError('');
-          }}
+          onChangeText={setEmail}
         />
-
-
-        {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
         <TextInput
           style={styles.input}
-          autoComplete='new-password'
-          keyboardType='default'
           placeholder='Password'
           secureTextEntry={true}
           value={password}
-          onChangeText={(input) => {
-            setPassword(input);
-            setPasswordError('');
-          }}
+          onChangeText={setPassword}
         />
-
-
-        {confirmError ? <Text style={styles.errorText}>{confirmError}</Text> : null}
         <TextInput
           style={styles.input}
+          placeholder='Confirm Password'
           secureTextEntry={true}
-          autoComplete='new-password'
-          placeholder='Confirm'
           value={confirm}
-          onChangeText={(input) => {
-            setConfirm(input);
-            setConfirmError('');
-          }}
+          onChangeText={setConfirm}
         />
-
+        
 
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
         <TouchableOpacity style={styles.button} onPress={onPressButton}>
           <Text style={styles.buttonText}>Register</Text>
         </TouchableOpacity>
 
+        <TouchableOpacity style={styles.registerButton} onPress={() => this.props.navigation.navigate('login')}>
+            <Text style={styles.registerButtonText}>Already have an Account?</Text>
+        </TouchableOpacity>
+
+       
 
       </View>
-
     </SafeAreaView>
-
   );
 };
-
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 10,
   },
-
   form: {
     marginTop: 50,
-
-  },
-  image: {
-    height: 200,
-    width: 200,
   },
   input: {
     height: 40,

@@ -13,7 +13,8 @@ export default class AuthorizationStack extends Component {
   render(){
     return (
       <NavigationContainer>
-        <AuthStack.Navigator
+        
+         <AuthStack.Navigator
           screenOptions={{
             headerShown: false,
             initialRouteName: 'login'
@@ -23,7 +24,11 @@ export default class AuthorizationStack extends Component {
           <AuthStack.Screen name='signup' component={Register} />
           <AuthStack.Screen name='main' component={MainApp} />
         </AuthStack.Navigator>
+
+
       </NavigationContainer>
+    
+       
     )
 
   }

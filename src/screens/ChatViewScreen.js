@@ -120,7 +120,6 @@ class ChatViewScreen extends Component {
       });
   
       if (response.status !== 200) {
-        // Handle server errors
         throw new Error(`HTTP status code: ${response.status}`);
       }
     } catch (error) {
@@ -154,9 +153,8 @@ class ChatViewScreen extends Component {
   };
 
   handleDetailPress = () => {
-    const { chat_id } = this.props.route.params;
-    console.log('View Chat Details Pressed');
-    this.props.navigation.navigate('ChatDetailScreen', { chat_id });
+    const { chatID } = this.state;
+    this.props.navigation.navigate('ChatDetails', { chatId: chatID });
 
   };
 
@@ -167,7 +165,7 @@ class ChatViewScreen extends Component {
   
     return (
       <SafeAreaView style={styles.container}>
-        <PageHeader title={chatName} icon="info" onPress={this.handleDetailPress} />
+        <PageHeader title={chatName} icon="info-circle" onPress={this.handleDetailPress} />
         <FlatList
           inverted
           data={messages}

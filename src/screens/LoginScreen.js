@@ -27,7 +27,7 @@ export default class LoginScreen extends Component {
     let isValid = true;
 
     if (!validator.validate(email)) {
-      this.setState({ error: 'Incorrect Email' });
+      this.setState({ error: 'Please Enter a Valid Email' });
       isValid = false;
       return;
     }
@@ -50,8 +50,11 @@ export default class LoginScreen extends Component {
       .then((response) => {
         if (response.status >= 200 && response.status < 300) {
           return response.json();
-        } else {
-          throw new Error('Server response not OK');
+        } else if(response.status >= 400 && response.status <500) {
+          throw new Error("Invalid email/password")
+        }
+         else {
+          throw new Error('Server Error Please Try again later');
         }
       })
       .then(async (rJson) => {

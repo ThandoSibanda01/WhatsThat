@@ -4,6 +4,9 @@ import { NavigationContainer } from "@react-navigation/native";
 
 import ChatListScreen from "../screens/ChatList";
 import ChatViewScreen from "../screens/ChatViewScreen"
+import CreateChatScreen from "../screens/CreateChatScreen"
+import ChatDetailsScreen from "../screens/ChatDetailScreen";
+import MemberDetails from "../screens/MemberDetails";
 
 
 
@@ -24,6 +27,9 @@ export default class ChatsStack extends Component{
           
         <ChatsNav.Screen name='ChatList' component={ChatListScreen} />
         <ChatsNav.Screen name='SingleChat' component={ChatViewScreen}/>
+        <ChatsNav.Screen name='CreateChat' component={CreateChatScreen}/>
+        <ChatsNav.Screen name='ChatDetails' component={ChatDetailsScreen}/>
+        <ChatsNav.Screen name='MemberDetails' component={MemberDetails}/>
 
        
       </ChatsNav.Navigator>
