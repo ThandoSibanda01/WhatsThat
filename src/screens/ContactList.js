@@ -19,10 +19,12 @@ class ContactList extends Component {
       const usersToken = await AsyncStorage.getItem('whatsthat_session_token');
       this.setState({ sessionToken: usersToken }, () => {
         this.fetchContacts();
+        console.log('Retrived Contacts' +this.state.contacts)
       });
     } catch (error) {
       console.error('Error retrieving token from AsyncStorage:', error);
     }
+    
   }
 
   handleHeaderIconPress = () => {
@@ -64,7 +66,7 @@ class ContactList extends Component {
     this.props.navigation.navigate('ContactDetails', {userID: user_id} )
 
   };
-
+  
  
 
   render() {
@@ -82,9 +84,9 @@ class ContactList extends Component {
           keyExtractor={(item) => item.user_id.toString()}
           data={contacts}
           renderItem={({ item }) => (
-            <TouchableOpacity onPress={this.handleContactPress}>
+            <TouchableOpacity onPress={() => this.props.navigation.navigate('ContactDetails', {userID: item.user_id})}>
               <ContactListItemSmall 
-                userID={item.user_id} 
+                userid={item.user_id} 
                 firstname={item.first_name} 
                 surname={item.last_name} 
               />

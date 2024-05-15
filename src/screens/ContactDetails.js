@@ -6,13 +6,12 @@ import {
     TouchableOpacity,
     Image,
     SafeAreaView,
-    Alert
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import PageHeader from '../components/PageHeader';
 
-class Profile extends Component {
+class ContactDetails extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -20,14 +19,15 @@ class Profile extends Component {
             surname: "",
             email: "",
             imageUri: null,
-            userID: '',
+            userID: props.route.params.userID,
+            chatID: props.route.params.chatID,
             error: ''
         };
     }
 
     async componentDidMount() {
+        
         try {
-            await this.fetchUserID();
             if (this.state.userID) {
                 await this.getUserDisplayPicture();
                 await this.getUserDetails();
@@ -39,18 +39,7 @@ class Profile extends Component {
         }
     }
 
-    fetchUserID = async () => {
-        try {
-            const userID = await AsyncStorage.getItem('whatsthat_user_id');
-            if (userID !== null) {
-                this.setState({ userID }); 
-            } else {
-                console.log("No user ID found");
-            }
-        } catch (error) {
-            console.error('Error retrieving user ID:', error);
-        }
-    };
+    
 
     getUserDetails = async () => {
         try {
@@ -101,10 +90,74 @@ class Profile extends Component {
         }
     };
 
-    handleLogout = async () => {
+
+    removeUser = async () => {
+        this.setState({ isLoading: true, error: null });
+        const token = await AsyncStorage.getItem('whatsthat_session_token');
+        try {
+            const response = await fetch(`http://localhost:3333/api/1.0.0/user/${this.state.userID}/contact`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Authorization': token,
+                },
+            });
+
+            if (response.ok) {
+               console.log(`Removed: ${this.state.userID}`)
+    
+            } else {
+                throw new Error(`Failed to remove user:${response}`);
+            }
+        } catch (error) {
+            console.log(`Removed: ${this.state.userID}`)
+            this.setState({ error: error.message });
+        } finally {
+            this.setState({ isLoading: false });
+        }
+    };
+
+    blockUser = async () => {
+        this.setState({ isLoading: true, error: null });
+        const token = await AsyncStorage.getItem('whatsthat_session_token');
+        try {
+            const response = await fetch(`http://localhost:3333/api/1.0.0/user/${this.state.userID}/block`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Authorization': token,
+                },
+            });
+
+            if (response.ok) {
+                Alert.alert("Success", "User removed from chat successfully");
+                this.props.navigation.navigate('ChatList');
+            } else {
+                throw new Error(`Failed to remove user from chat:${response}`);
+            }
+        } catch (error) {
+            Alert.alert("Error", error.message);
+            this.setState({ error: error.message });
+        } finally {
+            this.setState({ isLoading: false });
+        }
+    };
+
+    handleBlock = async () => {
         try {
             const sessionToken = await AsyncStorage.getItem('whatsthat_session_token');
-            const response = await fetch(`http://localhost:3333/api/1.0.0/logout`, { 
+            if (!sessionToken) {
+                throw new Error('Session token not found');
+            }
+    
+            const userID = this.state.userID;
+            if (!userID) {
+                throw new Error('User ID not found');
+            }
+    
+            console.log(`Blocking user with ID: ${userID}`);
+    
+            const response = await fetch(`http://localhost:3333/api/1.0.0/user/${userID}/block`, { 
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -113,23 +166,27 @@ class Profile extends Component {
             });
     
             if (response.status === 200) {
-                await AsyncStorage.removeItem('whatsthat_user_id');
-                await AsyncStorage.removeItem('whatsthat_session_token');
-                this.props.navigation.navigate('login');
+                console.log('User blocked successfully');
+                // Handle successful block action
             } else {
-                throw new Error('Failed logout with status: ' + response.status);
+                const errorMessage = await response.text();
+                throw new Error(`Failed to block user with status: ${response.status}, message: ${errorMessage}`);
             }
         } catch (error) {
-            this.setState({ error: 'Error during logout: ' + error.message });
+            console.error('Error during block:', error);
+            this.setState({ error: 'Error during block: ' + error.message });
         }
     };
 
+
+
+    
     render() {
         const { firstname, surname, email, imageUri } = this.state;
 
         return (
             <SafeAreaView style={styles.container}>
-                <PageHeader title="Profile" icon='pencil' onPress={() => this.props.navigation.navigate('EditUserProfile')} />
+                <PageHeader title="Profile"  />
                 
                 <View style={styles.profileSection}>
                     <Image
@@ -142,15 +199,15 @@ class Profile extends Component {
                 </View>
 
                 <View style={styles.buttonContainer}>
-
-
-                    <TouchableOpacity onPress={() => this.props.navigation.navigate('BlockedList')} style={styles.button}>
-                        <Text style={styles.buttonText}>Blocked Users</Text>
+                    <TouchableOpacity onPress={this.removeUser} style={styles.button}>
+                        <Text style={styles.buttonText}>Delete Contact</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity onPress={(this.handleLogout)} style={styles.button}>
-                        <Text style={styles.buttonText}>Log Out</Text>
+                    <TouchableOpacity onPress={this.handleBlock} style={styles.button}>
+                        <Text style={styles.buttonText}>Block</Text>
                     </TouchableOpacity>
+
+                   
                 </View>
             </SafeAreaView>
         );
@@ -198,4 +255,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default Profile;
+export default ContactDetails;

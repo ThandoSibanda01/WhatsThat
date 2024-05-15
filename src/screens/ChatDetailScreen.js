@@ -16,6 +16,7 @@ class ChatDetailsScreen extends Component {
 
     componentDidMount() {
         const { chatId } = this.props.route.params;
+        console.log('Chat Details Chat ID:', chatId);
         this.setState({ chatId });
         this.fetchChatDetails(chatId);
     }
@@ -79,8 +80,8 @@ class ChatDetailsScreen extends Component {
                 
                 <PageHeader
                     title={chatDetails.name}
-                    icon="plus"
-                    onPress={() => this.props.navigation.navigate('AddMember', { chatId: chatDetails.id })}
+                    icon="pencil"
+                    onPress={() => this.props.navigation.navigate('EditChatDetails', { chatID: this.state.chatId })}
                 />
                 
                 <FlatList

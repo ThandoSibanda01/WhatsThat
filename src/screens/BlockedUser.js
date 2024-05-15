@@ -10,7 +10,7 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import PageHeader from '../components/PageHeader';
 
-class UserProfile extends Component {
+class BlockedUser extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -96,33 +96,47 @@ class UserProfile extends Component {
     
     
 
-    handleAddContact = async () => {
+    handleBlock = async () => {
         try {
             const sessionToken = await AsyncStorage.getItem('whatsthat_session_token');
-            const response = await fetch(`http://localhost:3333/api/1.0.0/user/${this.state.userID}/contact`, { 
-                method: 'POST',
+            if (!sessionToken) {
+                throw new Error('Session token not found');
+            }
+    
+            const userID = this.state.userID;
+            if (!userID) {
+                throw new Error('User ID not found');
+            }
+    
+            console.log(`Blocking user with ID: ${userID}`);
+    
+            const response = await fetch(`http://localhost:3333/api/1.0.0/user/${userID}/block`, { 
+                method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-Authorization': sessionToken,
                 },
             });
-
+    
             if (response.status === 200) {
-                // Handle successful add contact action
+                console.log('User unblocked successfully');
+                // Handle successful block action
             } else {
-                throw new Error('Failed add contact with status: ' + response.status);
+                const errorMessage = await response.text();
+                throw new Error(`Failed to block user with status: ${response.status}, message: ${errorMessage}`);
             }
         } catch (error) {
-            this.setState({ error: 'Error during add contact: ' + error.message });
+            console.error('Error during block:', error);
+            this.setState({ error: 'Error during block: ' + error.message });
         }
-    }
+    };
 
     render() {
         const { firstname, surname, email, img } = this.state;
 
         return (
             <SafeAreaView style={styles.container}>
-                <PageHeader title="Profile" icon='pencil' />
+                <PageHeader title="Blocked Profile" icon='minus' onPress={this.handleBlock} />
                 
                 <View style={styles.profileSection}>
                     {img ? (
@@ -135,8 +149,8 @@ class UserProfile extends Component {
                 </View>
 
                 <View style={styles.buttonContainer}>
-                    <TouchableOpacity onPress={this.handleAddContact} style={styles.button}>
-                        <Text style={styles.buttonText}>Add Contact</Text>
+                    <TouchableOpacity onPress={this.handleBlock} style={styles.button}>
+                        <Text style={styles.buttonText}>Unblock</Text>
                     </TouchableOpacity>
 
                     
@@ -187,4 +201,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default UserProfile;
+export default BlockedUser;

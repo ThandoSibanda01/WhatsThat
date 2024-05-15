@@ -7,6 +7,7 @@ import ChatViewScreen from "../screens/ChatViewScreen"
 import CreateChatScreen from "../screens/CreateChatScreen"
 import ChatDetailsScreen from "../screens/ChatDetailScreen";
 import MemberDetails from "../screens/MemberDetails";
+import EditChatDetails from "../screens/EditChatDetails";
 
 
 
@@ -30,6 +31,8 @@ export default class ChatsStack extends Component{
         <ChatsNav.Screen name='CreateChat' component={CreateChatScreen}/>
         <ChatsNav.Screen name='ChatDetails' component={ChatDetailsScreen}/>
         <ChatsNav.Screen name='MemberDetails' component={MemberDetails}/>
+        <ChatsNav.Screen name = 'EditChatDetails' component ={EditChatDetails}/>
+
 
        
       </ChatsNav.Navigator>

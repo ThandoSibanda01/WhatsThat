@@ -12,12 +12,14 @@ class ContactListItemSmall extends Component {
     }
 
     async componentDidMount() {
+
+        
         this.fetchUserDisplayPicture();
     }
 
     fetchUserDisplayPicture = async () => {
         try {
-            const { userid } = this.props;  // Retrieve userid passed via props
+            const { userid } = this.props;  
             const token = await AsyncStorage.getItem('whatsthat_session_token');
             const response = await fetch(`http://localhost:3333/api/1.0.0/user/${userid}/photo`, {
                 method: 'GET',

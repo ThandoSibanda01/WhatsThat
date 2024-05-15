@@ -3,7 +3,9 @@ import React, { Component } from 'react';
 import { NavigationContainer } from "@react-navigation/native";
 
 import SearchScreen from "../screens/SearchScreen";
-import ContactView from "../screens/ContactView";
+import UserProfile from "../screens/UserProfile";
+import ContactDetails from "../screens/ContactDetails";
+
 
 const ContactNav = createNativeStackNavigator();
 
@@ -22,7 +24,8 @@ export default class SearchStack extends Component{
 
             
           <ContactNav.Screen name="SearchScreen" component={SearchScreen}/>
-          <ContactNav.Screen name="Profile" component={ContactView}/>
+          <ContactNav.Screen name="UserProfile" component={UserProfile}/>
+          <ContactNav.Screen name="ContactDetails" component={ContactDetails}/>
           
         </ContactNav.Navigator>
 

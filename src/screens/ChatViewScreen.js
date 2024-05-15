@@ -10,7 +10,6 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import PageHeader from '../components/PageHeader';
-
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 class ChatViewScreen extends Component {
@@ -25,31 +24,27 @@ class ChatViewScreen extends Component {
       newMessage: '',
       isLoading: false,
       messages: [],
-    }
+    };
   }
-
 
   async componentDidMount() {
     try {
       const usersToken = await AsyncStorage.getItem('whatsthat_session_token');
       const userId = await AsyncStorage.getItem('whatsthat_user_id');
-      const chatID = this.props.route.params.chatID; 
-      console.log('Chat ID:', chatID); 
-      this.setState({ usersToken, userId, chatID, }, () => {
+      const chatID = this.props.route.params.chatID;
+      console.log('Chat ID:', chatID);
+      this.setState({ usersToken, userId, chatID }, () => {
         this.getMessages();
       });
     } catch (error) {
       console.error('Error retrieving token from AsyncStorage:', error);
     }
-
-
   }
-
 
   sendMessage = async () => {
     const { usersToken, newMessage } = this.state;
     const { chatID } = this.props.route.params;
-    
+
     try {
       const response = await fetch(`http://localhost:3333/api/1.0.0/chat/${chatID}/message`, {
         method: 'POST',
@@ -65,20 +60,17 @@ class ChatViewScreen extends Component {
           this.getMessages();
         });
       } else {
-        
         throw new Error(`HTTP status code: ${response.status}`);
       }
     } catch (error) {
       this.setState({ error: error.message });
     }
-
-
   };
 
   getMessages = async (limit = 20, offset = 0) => {
     const { usersToken } = this.state;
-    const { chatID } = this.props.route.params; 
-  
+    const { chatID } = this.props.route.params;
+
     try {
       const response = await fetch(`http://localhost:3333/api/1.0.0/chat/${chatID}?limit=${limit}&offset=${offset}`, {
         method: 'GET',
@@ -87,13 +79,13 @@ class ChatViewScreen extends Component {
           'X-Authorization': usersToken,
         },
       });
-  
+
       if (response.status === 200) {
         const rJson = await response.json();
-        this.setState({ 
+        this.setState({
           messages: rJson.messages,
-          chatName: rJson.name });
-
+          chatName: rJson.name,
+        });
       } else if (response.status === 401) {
         throw 'Unauthroised request. Please try and sign in ';
       } else if (response.status === 403) {
@@ -108,7 +100,7 @@ class ChatViewScreen extends Component {
 
   updateMessage = async (chatId, messageId, newMessage) => {
     const { usersToken } = this.state;
-  
+
     try {
       const response = await fetch(`http://localhost:3333/api/1.0.0/chat/${chatId}/message/${messageId}`, {
         method: 'PATCH',
@@ -118,20 +110,20 @@ class ChatViewScreen extends Component {
         },
         body: JSON.stringify({ message: newMessage }),
       });
-  
+
       if (response.status !== 200) {
         throw new Error(`HTTP status code: ${response.status}`);
       }
     } catch (error) {
       this.setState({ error: error.message });
     }
-  
+
     this.getMessages();
   };
 
   deleteMessage = async (chatId, messageId) => {
     const { usersToken } = this.state;
-  
+
     try {
       const response = await fetch(`http://localhost:3333/api/1.0.0/chat/${chatId}/message/${messageId}`, {
         method: 'DELETE',
@@ -140,7 +132,7 @@ class ChatViewScreen extends Component {
           'X-Authorization': usersToken,
         },
       });
-  
+
       if (response.status !== 200) {
         // Handle server errors
         throw new Error(`HTTP status code: ${response.status}`);
@@ -148,21 +140,18 @@ class ChatViewScreen extends Component {
     } catch (error) {
       this.setState({ error: error.message });
     }
-  
+
     this.getMessages();
   };
 
   handleDetailPress = () => {
     const { chatID } = this.state;
     this.props.navigation.navigate('ChatDetails', { chatId: chatID });
-
   };
-
-  
 
   render() {
     const { newMessage, messages, isLoading, userId, chatName } = this.state;
-  
+
     return (
       <SafeAreaView style={styles.container}>
         <PageHeader title={chatName} icon="info-circle" onPress={this.handleDetailPress} />
@@ -171,14 +160,14 @@ class ChatViewScreen extends Component {
           data={messages}
           keyExtractor={(item) => item.message_id.toString()}
           renderItem={({ item }) => (
-            <View style={item.author.user_id.toString() === userId.toString() ? styles.myContainer : styles.otherContainer}>
-            <Text style={styles.nameText}>
-              {item.author.first_name} {item.author.last_name}
-            </Text>
-            <View style={item.author.user_id.toString() === userId.toString() ? styles.myMessage : styles.otherMessage}>
-              <Text style={styles.messageText}>{item.message}</Text>
+            <View style={item.author.user_id.toString() === userId.toString() ? styles.myMessageContainer : styles.otherMessageContainer}>
+              <Text style={item.author.user_id.toString() === userId.toString() ? styles.myNameText : styles.otherNameText}>
+                {item.author.first_name} {item.author.last_name}
+              </Text>
+              <View style={item.author.user_id.toString() === userId.toString() ? styles.myMessage : styles.otherMessage}>
+                <Text style={styles.messageText}>{item.message}</Text>
+              </View>
             </View>
-          </View>
           )}
         />
         <View style={styles.inputContainer}>
@@ -197,40 +186,49 @@ class ChatViewScreen extends Component {
   }
 }
 
-
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
   },
-  header: {
-    width: '100%',
-    height: 60,
-  },
-  heading: {},
-  myContainer: {
-    alignItems: 'flex-end',
+  myMessageContainer: {
+    alignSelf: 'flex-end',
     marginVertical: 5,
+    paddingRight: 10,
+  },
+  otherMessageContainer: {
+    alignSelf: 'flex-start',
+    marginVertical: 5,
+    paddingLeft: 10,
   },
   myMessage: {
     backgroundColor: 'purple',
-    borderRadius: 5,
-    marginBottom: 10,
+    borderRadius: 10,
     padding: 10,
-    marginRight: 5,
+    maxWidth: '70%',
   },
   otherMessage: {
-    backgroundColor: 'darkgrey',
-    borderRadius: 5,
-    marginBottom: 10,
+    backgroundColor: 'grey',
+    borderRadius: 10,
     padding: 10,
+    maxWidth: '70%',
   },
   messageText: {
     color: 'white',
   },
-  nameText: {
-    marginHorizontal: 10,
+  myNameText: {
+    color: '#555',
+    fontSize: 12,
+    marginBottom: 3,
+    alignSelf: 'flex-end', 
+    paddingRight: 10,
+  },
+  otherNameText: {
+    color: '#555',
+    fontSize: 12,
+    marginBottom: 3,
+    alignSelf: 'flex-start',
+    paddingLeft: 10,
   },
   inputContainer: {
     flexDirection: 'row',
@@ -238,6 +236,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 10,
     backgroundColor: '#fff',
+    borderTopWidth: 1,
+    borderColor: '#ddd',
   },
   input: {
     flex: 1,
@@ -257,6 +257,5 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
 });
-
 
 export default ChatViewScreen;

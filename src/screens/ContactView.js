@@ -64,7 +64,7 @@ class ContactView extends Component {
     }
   };
 
-  ender() {
+  render() {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.userContainer}>

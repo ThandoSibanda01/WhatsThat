@@ -4,6 +4,7 @@ import { NavigationContainer } from "@react-navigation/native";
 
 import ContactList from "../screens/ContactList";
 import ContactView from "../screens/ContactView";
+import ContactDetails from "../screens/ContactDetails";
 
 const ContactNav = createNativeStackNavigator();
 
@@ -21,7 +22,7 @@ export default class ContactStack extends Component{
         >
           
           <ContactNav.Screen name="ContactList" component={ContactList}/>
-          <ContactNav.Screen name="ContactDetails" component={ContactView}/>
+          <ContactNav.Screen name="ContactDetails" component={ContactDetails}/>
         </ContactNav.Navigator>
 
       

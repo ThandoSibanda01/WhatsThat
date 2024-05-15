@@ -116,7 +116,7 @@ const Register = () => {
           <Text style={styles.buttonText}>Register</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.registerButton} onPress={() => this.props.navigation.navigate('login')}>
+        <TouchableOpacity style={styles.registerButton} onPress={() => navigation.navigate('login')}>
             <Text style={styles.registerButtonText}>Already have an Account?</Text>
         </TouchableOpacity>
 

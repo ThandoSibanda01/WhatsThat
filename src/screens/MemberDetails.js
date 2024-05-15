@@ -26,6 +26,7 @@ class MemberDetails extends Component {
     }
 
     async componentDidMount() {
+        
         try {
             if (this.state.userID) {
                 await this.getUserDisplayPicture();
@@ -89,13 +90,42 @@ class MemberDetails extends Component {
         }
     };
 
+
+    removeUserFromChat = async () => {
+        this.setState({ isLoading: true, error: null });
+        const token = await AsyncStorage.getItem('whatsthat_session_token');
+        try {
+            const response = await fetch(`http://localhost:3333/api/1.0.0/chat/${this.state.chatID}/user/${this.state.userID}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Authorization': token,
+                },
+            });
+
+            if (response.ok) {
+                Alert.alert("Success", "User removed from chat successfully");
+                this.props.navigation.navigate('ChatList');
+            } else {
+                throw new Error(`Failed to remove user from chat:${response}`);
+            }
+        } catch (error) {
+            Alert.alert("Error", error.message);
+            this.setState({ error: error.message });
+        } finally {
+            this.setState({ isLoading: false });
+        }
+    };
+
+
+
     
     render() {
         const { firstname, surname, email, imageUri } = this.state;
 
         return (
             <SafeAreaView style={styles.container}>
-                <PageHeader title="Profile" icon='pencil' />
+                <PageHeader title="Profile"  />
                 
                 <View style={styles.profileSection}>
                     <Image
@@ -108,7 +138,7 @@ class MemberDetails extends Component {
                 </View>
 
                 <View style={styles.buttonContainer}>
-                    <TouchableOpacity onPress={this.handleBlock} style={styles.button}>
+                    <TouchableOpacity onPress={this.removeUserFromChat} style={styles.button}>
                         <Text style={styles.buttonText}>Remove From Group</Text>
                     </TouchableOpacity>
 

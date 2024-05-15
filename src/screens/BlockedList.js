@@ -18,7 +18,7 @@ class BlockedList extends Component {
     try {
       const usersToken = await AsyncStorage.getItem('whatsthat_session_token');
       this.setState({ sessionToken: usersToken }, () => {
-        this.fetchContacts();
+        this.fetchBlockedList();
       });
     } catch (error) {
       console.error('Error retrieving token from AsyncStorage:', error);
@@ -31,12 +31,12 @@ class BlockedList extends Component {
     
   };
 
-  fetchContacts = async () => {
+  fetchBlockedList = async () => {
     const { isLoading, sessionToken } = this.state;
     if (!isLoading && sessionToken) {
       this.setState({ isLoading: true });
       try {
-        const response = await fetch('http://localhost:3333/api/1.0.0/contacts', {
+        const response = await fetch('http://localhost:3333/api/1.0.0/blocked', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -60,8 +60,8 @@ class BlockedList extends Component {
     }
   };
 
-  handleContactPress = () => {
-    this.props.navigation.navigate('ContactDetails', {userID: user_id} )
+  handleUserPress = (userNumber) => {
+    this.props.navigation.navigate('BlockedUser', {userID: userNumber} )
 
   };
 
@@ -81,9 +81,9 @@ class BlockedList extends Component {
           keyExtractor={(item) => item.user_id.toString()}
           data={contacts}
           renderItem={({ item }) => (
-            <TouchableOpacity onPress={this.handleContactPress}>
+            <TouchableOpacity onPress={() => this.handleUserPress(item.user_id)}>
               <ContactListItemSmall 
-                userID={item.user_id} 
+                userid={item.user_id} 
                 firstname={item.first_name} 
                 surname={item.last_name} 
               />
